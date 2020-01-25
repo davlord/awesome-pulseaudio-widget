@@ -18,6 +18,8 @@ local icon = {
 
 function iconhelper.get_icon(state)
     if state.muted then return icon.muted end
+    if state.volume <= 33 then return icon.low end
+    if state.volume <= 66 then return icon.medium end
     return icon.high
 end
 
