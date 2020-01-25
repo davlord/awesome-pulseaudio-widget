@@ -49,6 +49,18 @@ local function get_device(connection, path)
     return core_proxy
 end
 
+local function get_volume(device)
+    local base_volume = device:get_property("org.PulseAudio.Core1.Device","BaseVolume")[1].value
+    local volume = device:get_property("org.PulseAudio.Core1.Device","Volume")[1].value
+    
+    local volume_percent = {}
+    for i, v in ipairs(volume) do
+        volume_percent[i] = math.ceil(v / base_volume * 100)
+    end
+  
+    return volume_percent[1]
+end
+
 local function listen_core_events(connection, core, on_change)
     local sinks = core:get("Sinks")
 
@@ -74,11 +86,10 @@ local function listen_core_events(connection, core, on_change)
     local function notify()
         
         local muted = device:get_property("org.PulseAudio.Core1.Device","Mute")[1].value
-        local volume = device:get_property("org.PulseAudio.Core1.Device","Volume")[1].value
 
         local audio_state = {
             muted = muted,
-            volume = volume
+            volume = get_volume(device)
         }
 
         on_change(audio_state) 
@@ -86,6 +97,7 @@ local function listen_core_events(connection, core, on_change)
 
     device:on_signal(notify)
     device:on_properties_changed(notify)
+    notify()
 end
 
 function pulse:on_change(callback)

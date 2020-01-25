@@ -14,16 +14,17 @@ function pulseaudio_widget:update_icon(state)
     self.imagebox:set_image(iconhelper.get_icon(state):load_surface())
 end
 
-function pulseaudio_widget:update_text()
+function pulseaudio_widget:update_text(state)
+    self.textbox:set_text(string.format("%02d%%", state.volume))
 end
 
-function pulseaudio_widget:update_tooltip()
+function pulseaudio_widget:update_tooltip(state)
 end
 
 function pulseaudio_widget:update(state)
     self:update_icon(state)
-    self:update_text()
-    self:update_tooltip()
+    self:update_text(state)
+    self:update_tooltip(state)
 end
 
 local function new(args)
@@ -48,9 +49,6 @@ local function new(args)
     pulse_client = pulseaudio()
     pulse_client:on_change(function(pulse_state) w:update(pulse_state) end)
     pulse_client:connect()
-
-    -- todo get current state from pulseaudio
-    w:update({})
 
     return w
 end
