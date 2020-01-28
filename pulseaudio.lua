@@ -5,15 +5,15 @@ local DBusProxy = Gio.DBusProxy
 local BusType = Gio.BusType
 local DBusConnection = Gio.DBusConnection
 local DBusConnectionFlags = Gio.DBusConnectionFlags
+local DBusSignalFlags = Gio.DBusSignalFlags
 local Variant = GLib.Variant
 
 local dbus_proxy = require("awesome-pulseaudio-widget.dbusproxy")
 
 local pulse = { mt = {} }
 
-local function get_connection()
-    local session_bus = Gio.bus_get_sync(BusType.SESSION)
-
+local function get_connection(session_bus)
+    
     local address_proxy = dbus_proxy({
             bus = session_bus,
             interface = "org.PulseAudio.ServerLookup1",
@@ -105,9 +105,26 @@ function pulse:on_change(callback)
 end
 
 function pulse:connect()
-    local connection = get_connection()
-    local core = get_core(connection)
-    listen_core_events(connection, core, self._private.on_change)
+
+    local session_bus = Gio.bus_get_sync(BusType.SESSION)
+
+    local init = function()
+        local connection = get_connection(session_bus)
+        local core = get_core(connection)
+        listen_core_events(connection, core, self._private.on_change)
+    end
+
+    session_bus:signal_subscribe(
+        nil, 
+        "org.freedesktop.DBus", 
+        nil, 
+        nil, 
+        "org.PulseAudio1", 
+        DBusSignalFlags.NONE, 
+        init
+    )
+    
+    pcall(init)
 end
 
 
