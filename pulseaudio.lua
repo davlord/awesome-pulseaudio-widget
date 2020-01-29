@@ -106,15 +106,17 @@ end
 
 function pulse:connect()
 
+    local session_bus_subscribtion = nil
     local session_bus = Gio.bus_get_sync(BusType.SESSION)
 
     local init = function()
         local connection = get_connection(session_bus)
         local core = get_core(connection)
         listen_core_events(connection, core, self._private.on_change)
+        session_bus:signal_unsubscribe(session_bus_subscribtion)
     end
 
-    session_bus:signal_subscribe(
+    session_bus_subscribtion = session_bus:signal_subscribe(
         nil, 
         "org.freedesktop.DBus", 
         nil, 
