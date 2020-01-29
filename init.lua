@@ -15,7 +15,11 @@ function pulseaudio_widget:update_icon(state)
 end
 
 function pulseaudio_widget:update_text(state)
-    self.textbox:set_text(string.format("%02d%%", state.volume))
+    if state.pulse == true then
+        self.textbox:set_text(string.format("%02d%%", state.volume))
+    else
+        self.textbox:set_text("...")
+    end
 end
 
 function pulseaudio_widget:update_tooltip(state)

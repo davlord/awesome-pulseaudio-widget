@@ -89,7 +89,8 @@ local function listen_core_events(connection, core, on_change)
 
         local audio_state = {
             muted = muted,
-            volume = get_volume(device)
+            volume = get_volume(device),
+            pulse = true
         }
 
         on_change(audio_state) 
@@ -105,6 +106,12 @@ function pulse:on_change(callback)
 end
 
 function pulse:connect()
+
+    self._private.on_change({
+        muted = true,
+        volume = -1,
+        pulse = false
+    })
 
     local session_bus_subscribtion = nil
     local session_bus = Gio.bus_get_sync(BusType.SESSION)
