@@ -32,6 +32,14 @@ function proxy:get_property(interface, name)
     ).value
 end
 
+function proxy:set_property(interface, name, params)
+    self:call(
+        "org.freedesktop.DBus.Properties",
+        "Set",
+        Variant('(ssv)',{interface, name, params})
+    )
+end
+
 function proxy:call(interface, method, params)
     return self._private.proxy:call_sync(
         (interface or self._private.interface) .. "." .. method,

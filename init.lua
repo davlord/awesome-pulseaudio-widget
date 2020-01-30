@@ -23,6 +23,11 @@ function pulseaudio_widget:update_text(state)
 end
 
 function pulseaudio_widget:update_tooltip(state)
+    if state.pulse == true then
+        self.tooltip:set_text(state.name)
+    else
+        self.tooltip:set_text("connecting to pulseaudio...")
+    end
 end
 
 function pulseaudio_widget:update(state)
@@ -51,8 +56,13 @@ local function new(args)
     gears.table.crush(w, pulseaudio_widget, true)
 
     pulse_client = pulseaudio()
-    pulse_client:on_change(function(pulse_state) w:update(pulse_state) end)
-    pulse_client:connect()
+    pulse_client:connect(function(pulse_state) w:update(pulse_state) end)
+
+    w:buttons(gears.table.join(
+        awful.button({ }, 1, function() pulse_client:toggle_mute() end),
+        awful.button({ }, 4, function()  end),
+        awful.button({ }, 5, function()  end)
+    ))
 
     return w
 end
