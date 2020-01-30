@@ -9,7 +9,6 @@ local DBusSignalFlags = Gio.DBusSignalFlags
 local Variant = GLib.Variant
 
 local dbus_proxy = require("awesome-pulseaudio-widget.dbusproxy")
-local dbg = require(".debug")
 
 local pulse = { mt = {} }
 
@@ -50,7 +49,8 @@ local function get_device(connection, path)
     return core_proxy
 end
 
-local function enable_core_events(core)
+function pulse:enable_core_events()
+    local core = self._private.core
     core:call(
         nil,
         "ListenForSignal",
@@ -61,6 +61,19 @@ local function enable_core_events(core)
         "ListenForSignal",
         Variant('(sao)',{"org.PulseAudio.Core1.Device.MuteUpdated",{}})
     )
+    core:call(
+        nil,
+        "ListenForSignal",
+        Variant('(sao)',{"org.PulseAudio.Core1.NewSink",{core:get_path()}})
+    )
+    core:call(
+        nil,
+        "ListenForSignal",
+        Variant('(sao)',{"org.PulseAudio.Core1.SinkRemoved",{core:get_path()}})
+    )
+    core:on_signal(function() 
+        self:update_sinks() 
+    end)
 end
 
 
@@ -94,7 +107,7 @@ function pulse:update_device(device)
 
     self._private.device = device
 
-    local function notify()        
+    local function notify()    
         local name = device:get_property("org.PulseAudio.Core1.Device","Name")[1].value
 
         local audio_state = {
@@ -116,7 +129,7 @@ function pulse:update_sinks()
     local core = self._private.core
     local connection = self._private.connection 
 
-    local sinks = core:get("Sinks")
+    local sinks = core:get_property("org.PulseAudio.Core1","Sinks")[1].value
     local device = dbus_proxy({
             bus=connection,
             interface="org.PulseAudio.Core1.Device",
@@ -148,7 +161,7 @@ function pulse:connect(on_change)
     local init = function()
         self._private.connection = get_connection(session_bus)
         self._private.core = get_core(self._private.connection)
-        enable_core_events(self._private.core)
+        self:enable_core_events()
         self:update_sinks()
         session_bus:signal_unsubscribe(session_bus_subscribtion)
     end

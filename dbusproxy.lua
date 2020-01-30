@@ -20,6 +20,10 @@ function proxy:connect()
     self._private.proxy = p
 end
 
+function proxy:get_path()
+    return self._private.path
+end
+
 function proxy:get(name)
     return self._private.proxy:get_cached_property(name).value
 end
