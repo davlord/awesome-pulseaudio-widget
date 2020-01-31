@@ -76,9 +76,12 @@ function pulse:enable_core_events()
     end)
 end
 
+local function get_base_volume(device)
+    return device:get_property("org.PulseAudio.Core1.Device","BaseVolume")[1].value
+end
 
-local function get_volume(device)
-    local base_volume = device:get_property("org.PulseAudio.Core1.Device","BaseVolume")[1].value
+local function get_volume_percent(device)
+    local base_volume = get_base_volume(device)
     local volume = device:get_property("org.PulseAudio.Core1.Device","Volume")[1].value
     
     local volume_percent = {}
@@ -86,7 +89,20 @@ local function get_volume(device)
         volume_percent[i] = math.ceil(v / base_volume * 100)
     end
   
-    return volume_percent[1]
+    return volume_percent
+end
+
+local function set_volume(device, value)
+    device:set_property("org.PulseAudio.Core1.Device","Volume", Variant("au", value))
+end
+
+local function set_volume_percent(device, value)
+    local base_volume = get_base_volume(device)
+    local volume = {}
+    for i, v in ipairs(value) do
+      volume[i] = v * base_volume / 100
+    end
+    set_volume(device, volume)
 end
 
 local function is_muted(device)
@@ -113,7 +129,7 @@ function pulse:update_device(device)
         local audio_state = {
             name = name,
             muted = is_muted(device),
-            volume = get_volume(device),
+            volume = get_volume_percent(device)[1],
             pulse = true
         }
 
@@ -144,6 +160,17 @@ function pulse:toggle_mute()
     local device = self._private.device
     local is_muted = is_muted(device)
     set_muted(device, not is_muted)
+end
+
+function pulse:update_volume(value)
+    local device = self._private.device
+    local volume = get_volume_percent(device)
+    for i, v in ipairs(volume) do  
+        volume[i] = v + value
+        if (volume[i] < 0) then volume[i] = 0 end
+        if (volume[i] > 200) then volume[i] = 200 end
+    end
+    set_volume_percent(device, volume)
 end
 
 function pulse:connect(on_change)

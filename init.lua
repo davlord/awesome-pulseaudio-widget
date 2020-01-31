@@ -60,8 +60,8 @@ local function new(args)
 
     w:buttons(gears.table.join(
         awful.button({ }, 1, function() pulse_client:toggle_mute() end),
-        awful.button({ }, 4, function()  end),
-        awful.button({ }, 5, function()  end)
+        awful.button({ }, 4, function() pulse_client:update_volume(5) end),
+        awful.button({ }, 5, function() pulse_client:update_volume(-5) end)
     ))
 
     return w
