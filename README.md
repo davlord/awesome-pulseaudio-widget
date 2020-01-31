@@ -6,7 +6,6 @@ A pulseaudio volume control widget for Awesome WM
 ## features
 
 * Lightweight (no constant polling but event based updates)
-* Additional details on tooltip
 * Support multiple sinks
 * Volume/Mute control
 * Does not fail if pulseaudio is not up yet
@@ -16,13 +15,13 @@ A pulseaudio volume control widget for Awesome WM
 1.Clone in your config directory (`~/.config/awesome/`)
 ```bash
 cd ~/.config/awesome/
-git clone https://github.com/davlord/awesome-battery-widget.git
+git clone https://github.com/davlord/awesome-pulseaudio-widget.git
 ```
 
 2.Add to your wibar widgets (`~/.config/awesome/rc.lua`)
 
 ```lua
-local battery_widget = require("awesome-battery-widget")
+local audio_widget = require("awesome-pulseaudio-widget")
 
 -- Add widgets to the wibox
     s.mywibox:setup {
@@ -36,7 +35,7 @@ local battery_widget = require("awesome-battery-widget")
         s.mytasklist, -- Middle widget
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
-            battery_widget(),
+            audio_widget(),
             wibox.widget.systray(),
             mytextclock,
             s.mylayoutbox,
