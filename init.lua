@@ -55,14 +55,19 @@ local function new(args)
 
     gears.table.crush(w, pulseaudio_widget, true)
 
-    pulse_client = pulseaudio()
-    pulse_client:connect(function(pulse_state) w:update(pulse_state) end)
-
-    w:buttons(gears.table.join(
+    local buttons_binding = gears.table.join(
         awful.button({ }, 1, function() pulse_client:toggle_mute() end),
         awful.button({ }, 4, function() pulse_client:update_volume(5) end),
         awful.button({ }, 5, function() pulse_client:update_volume(-5) end)
-    ))
+    )
+
+    pulse_client = pulseaudio()
+    pulse_client:on_pulse_connect(function() 
+        w:buttons(buttons_binding) 
+    end)
+    pulse_client:connect(function(pulse_state) 
+        w:update(pulse_state) 
+    end)
 
     return w
 end

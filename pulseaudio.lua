@@ -173,6 +173,10 @@ function pulse:update_volume(value)
     set_volume_percent(device, volume)
 end
 
+function pulse:on_pulse_connect(on_pulse_connect)
+    self._private.on_pulse_connect = on_pulse_connect
+end
+
 function pulse:connect(on_change)
     self._private.on_change = on_change
     -- initial widget state
@@ -191,6 +195,7 @@ function pulse:connect(on_change)
         self:enable_core_events()
         self:update_sinks()
         session_bus:signal_unsubscribe(session_bus_subscribtion)
+        if self._private.on_pulse_connect ~= nil then self._private.on_pulse_connect() end
     end
 
     -- if dbus is started after the widget
