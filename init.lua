@@ -11,7 +11,7 @@ local pulseaudio_widget = { mt = {} }
 local pulse_client = nil
 
 function pulseaudio_widget:update_icon(state)
-    self.imagebox:set_image(iconhelper.get_icon(state):load_surface())
+    self.imageboxcontainer.imagebox:set_image(iconhelper.get_icon(state):load_surface())
 end
 
 function pulseaudio_widget:update_text(state)
@@ -41,9 +41,15 @@ local function new(args)
         layout = wibox.layout.fixed.horizontal,
         spacing = 2,
         {
-            id = "imagebox",
-            widget = wibox.widget.imagebox,
-            resize = true,
+            top    = 3,
+            bottom = 3,
+            layout = wibox.container.margin,
+            id = "imageboxcontainer",
+            {
+                id = "imagebox",
+                widget = wibox.widget.imagebox,
+                resize = true,
+            },
         },
         {
             id = "textbox",
